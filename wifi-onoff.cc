@@ -8,13 +8,13 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("Mywireless");
+NS_LOG_COMPONENT_DEFINE ("MywirelessOnoff");
 
 int main (int argc, char *argv[])
 {
 	bool verbose = true;
-	uint32_t nWifi = 3;
-	bool tracing = true;
+	uint32_t nWifi = 1;
+	bool tracing = false;
 
 	CommandLine cmd;
 	cmd.AddValue("nWifi", "Number of wifi STA devices", nWifi);
@@ -31,7 +31,8 @@ int main (int argc, char *argv[])
 
 	if (verbose)
 	{
-		LogComponentEnable ("Mywireless", LOG_LEVEL_INFO);
+		LogComponentEnable ("MywirelessOnoff", LOG_LEVEL_INFO);
+		LogComponentEnable ("PacketSink", LOG_LEVEL_INFO);
 	}
 
 	NodeContainer wifiApNode;
@@ -42,12 +43,14 @@ int main (int argc, char *argv[])
 	YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
 	YansWifiPhyHelper phy = YansWifiPhyHelper::Default();
 	phy.SetChannel(channel.Create());
+	phy.Set ("ShortGuardEnabled", BooleanValue(true));
 
 	WifiHelper wifi;
-	wifi.SetStandard(WIFI_PHY_STANDARD_80211n_5GHZ);
-	wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue("VhtMcs9"), "ControlMode", StringValue("VhtMcs0"));
+	wifi.SetStandard (WIFI_PHY_STANDARD_80211ac);
+	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode",
+			StringValue("VhtMcs9"), "ControlMode", StringValue("VhtMcs0"));
 
-	Ssid ssid = Ssid ("ns3-wifi-80211n");
+	Ssid ssid = Ssid ("ns3-wifi-80211ac");
 
 	WifiMacHelper mac;
 
@@ -75,7 +78,7 @@ int main (int argc, char *argv[])
 			"LayoutType", StringValue ("RowFirst"));
 
 	mobility.SetMobilityModel("ns3::RandomWalk2dMobilityModel",
-			"Bounds", RectangleValue (Rectangle (-100,100,-100,100)));
+			"Bounds", RectangleValue (Rectangle (-50,50,-50,50)));
 	mobility.Install (wifiStaNodes);
 
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -95,30 +98,35 @@ int main (int argc, char *argv[])
 
 	NS_LOG_INFO ("Create Application");
 
-	OnOffHelper clientHelper ("ns3::UdpSocketFactory", Address());
-	clientHelper.SetAttribute("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-	clientHelper.SetAttribute("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-	clientHelper.SetAttribute("PacketSize", UintegerValue (25));
-	clientHelper.SetAttribute("DataRate", DataRateValue (DataRate ("2500kb/s")));
+	uint16_t port = 50000;
+	Address sinkLocalAddress (InetSocketAddress (Ipv4Address::GetAny(), port));
+	PacketSinkHelper sinkHelper ("ns3::UdpSocketFactory", sinkLocalAddress);
 
-	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes);
-	clientApps.Start(Seconds (1.0));
-	clientApps.Stop(Seconds (10.0));
-
-	PacketSinkHelper sinkHelper ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 9)));
-	ApplicationContainer clientSink = sinkHelper.Install(wifiApNode);
-
+	ApplicationContainer clientSink = sinkHelper.Install(wifiApNode.Get(0));
 	clientSink.Start(Seconds (1.0));
 	clientSink.Stop(Seconds (10.0));
 
+	OnOffHelper clientHelper ("ns3::UdpSocketFactory",Address());
+	AddressValue remoteAddress (InetSocketAddress(apInterfaces.GetAddress(0), port));
+	clientHelper.SetAttribute("Remote", remoteAddress);
+	clientHelper.SetAttribute("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+	clientHelper.SetAttribute("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+	clientHelper.SetAttribute("PacketSize", UintegerValue (1024));
+	clientHelper.SetAttribute("DataRate", StringValue ("10kb/s"));
+
+	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes.Get(0));
+
+	clientApps.Start(Seconds (1.0));
+	clientApps.Stop(Seconds (10.1));
+
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
-	Simulator::Stop(Seconds (10.0));
+	Simulator::Stop(Seconds (10.2));
 
 	if (tracing == true)
 	{
-		phy.EnablePcap ("mywireless", apDevices.Get(0));
-		phy.EnablePcap("mywireless", staDevices.Get(1));
+		phy.EnablePcap ("mywirelessonoff", apDevices.Get(0));
+		phy.EnablePcap("mywirelessonoff", staDevices.Get(0));
 	}
 
 	Simulator::Run();
