@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
 	clientHelper.SetAttribute("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
 	clientHelper.SetAttribute("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
 	clientHelper.SetAttribute("PacketSize", UintegerValue (1024));
-	clientHelper.SetAttribute("DataRate", StringValue ("10kb/s"));
+	clientHelper.SetAttribute("DataRate", StringValue ("1kb/s"));
 
 	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes.Get(0));
 
