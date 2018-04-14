@@ -111,17 +111,30 @@ int main (int argc, char *argv[])
 	clientHelper.SetAttribute("Remote", remoteAddress);
 	clientHelper.SetAttribute("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
 	clientHelper.SetAttribute("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+<<<<<<< HEAD
 	clientHelper.SetAttribute("PacketSize", UintegerValue (25));
 	clientHelper.SetAttribute("DataRate", StringValue ("20000b/s"));
+=======
+	clientHelper.SetAttribute("PacketSize", UintegerValue (1024));
+	clientHelper.SetAttribute("DataRate", StringValue ("1kb/s"));
+>>>>>>> origin/master
 
 	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes.Get(0));
 
 	clientApps.Start(Seconds (1.0));
+<<<<<<< HEAD
 	clientApps.Stop(Seconds (10.0));
 
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
 	Simulator::Stop(Seconds (10.0));
+=======
+	clientApps.Stop(Seconds (10.1));
+
+	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+
+	Simulator::Stop(Seconds (10.2));
+>>>>>>> origin/master
 
 	if (tracing == true)
 	{
