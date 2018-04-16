@@ -13,8 +13,8 @@ NS_LOG_COMPONENT_DEFINE ("MywirelessOnoff");
 int main (int argc, char *argv[])
 {
 	bool verbose = true;
-	uint32_t nWifi = 1;
-	bool tracing = false;
+	uint32_t nWifi = 2;
+	bool tracing = true;
 
 	CommandLine cmd;
 	cmd.AddValue("nWifi", "Number of wifi STA devices", nWifi);
@@ -112,9 +112,9 @@ int main (int argc, char *argv[])
 	clientHelper.SetAttribute("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
 	clientHelper.SetAttribute("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
 	clientHelper.SetAttribute("PacketSize", UintegerValue (25));
-	clientHelper.SetAttribute("DataRate", StringValue ("2000b/s"));
+	clientHelper.SetAttribute("DataRate", StringValue ("200b/s"));
 
-	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes.Get(0));
+	ApplicationContainer clientApps = clientHelper.Install(wifiStaNodes);
 
 	clientApps.Start(Seconds (1.0));
 	clientApps.Stop(Seconds (10.0));
