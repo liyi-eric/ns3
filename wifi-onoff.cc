@@ -13,7 +13,7 @@ NS_LOG_COMPONENT_DEFINE ("MywirelessOnoff");
 int main (int argc, char *argv[])
 {
 	bool verbose = true;
-	uint32_t nWifi = 2;
+	uint32_t nWifi = 10;
 	bool tracing = true;
 
 	CommandLine cmd;
@@ -33,6 +33,7 @@ int main (int argc, char *argv[])
 	{
 		LogComponentEnable ("MywirelessOnoff", LOG_LEVEL_INFO);
 		LogComponentEnable ("PacketSink", LOG_LEVEL_INFO);
+		LogComponentEnable ("ConstantRateWifiManager", LOG_LEVEL_INFO);
 	}
 
 	NodeContainer wifiApNode;
@@ -48,7 +49,7 @@ int main (int argc, char *argv[])
 	WifiHelper wifi;
 	wifi.SetStandard (WIFI_PHY_STANDARD_80211ac);
 	wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode",
-			StringValue("VhtMcs9"), "ControlMode", StringValue("VhtMcs0"));
+			StringValue("VhtMcs9"), "ControlMode", StringValue("VhtMcs9"));
 
 	Ssid ssid = Ssid ("ns3-wifi-80211ac");
 
