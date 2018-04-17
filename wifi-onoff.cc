@@ -23,9 +23,9 @@ int main (int argc, char *argv[])
 
 	cmd.Parse(argc, argv);
 
-	if (nWifi > 250)
+	if (nWifi > 249)
 	{
-		std::cout << "Too many wifi nodes, no more than 250 each." << std::endl;
+		std::cout << "Too many wifi nodes, no more than 249 each." << std::endl;
 		return 1;
 	}
 
@@ -119,10 +119,6 @@ int main (int argc, char *argv[])
 
 	clientApps.Start(Seconds (1.0));
 	clientApps.Stop(Seconds (10.0));
-
-	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-
-	Simulator::Stop(Seconds (10.0));
 
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
